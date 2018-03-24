@@ -6,7 +6,7 @@ import DataAccessLayer.Worker;
 
 public class Command_Line_gui {
 
-	private buisinessManager BL;
+	private buisinessManager BL;	//connection to the business Layer
 	private Scanner in;
 
 	public Command_Line_gui() {
@@ -16,13 +16,14 @@ public class Command_Line_gui {
 	public buisinessManager getBL() {
 		return BL;
 	}
-
+	//the main program of the presentation layer.
 	public void run() {
 		in = new Scanner(System.in);
 		System.out.println("Super-S&Y Menu:\n1." + " Insert new Worker \n2." + " Update worker\n3."
 				+ " Get worker details\n4." + " Exit.");
 		String s = in.nextLine();
 		int num;
+		//the user is not insert correct input.
 		while ((num = cutNumString(s)) == -1) {
 			System.out.println("Illegal input, please try again.\n\n");
 			System.out.println("Super-S&Y Menu:\n1." + " Insert new Worker \n2." + " Update worker\n3."
@@ -34,16 +35,20 @@ public class Command_Line_gui {
 			addWorkerToTable();
 			break;
 		case 2:
+			UpdateWorker();
 			break;
 		case 3:
+			getWorkerDetails();
 			break;
 		case 4:
+			System.exit(0);
 			break;
 
 		}
 
 	}
 
+	
 	private int cutNumString(String s) {
 		if (s.length() == 0 || s.length() > 1 || s.charAt(0) < 49 || s.charAt(0) > 52)
 			return -1;
@@ -55,6 +60,7 @@ public class Command_Line_gui {
 		}
 	}
 
+	
 	private void addWorkerToTable() {
 		int id;
 		String fname, lname;
@@ -103,9 +109,132 @@ public class Command_Line_gui {
 						salery = Integer.parseInt(s);
 						BL.addNewWorker(new Worker(id, fname, lname, salery, null));
 						System.out.println("Worker added successfully");
-
+						run();
 					}
 				}
+			}
+		}
+	}
+
+	private void UpdateWorker() {
+		int id;
+		System.out.println("Update worker menu:\nEnter worker ID.\nIf you wish to return to the main Menu press ~ ");
+		String s = in.nextLine();
+		while (!checkForExit(s) && cutID(s) == -1) {
+			System.out.println("Illegal input, please try again.");
+			s = in.nextLine();
+		}
+		if (checkForExit(s))
+			run();
+		else {
+			id = Integer.parseInt(s);
+			if (!BL.checkIfIdExist(id)) {
+				System.out.println("The worker does not exist\n");
+				run();
+			} else {
+				Worker worker = BL.getWorkerById(id);
+				System.out.println(
+						"1. Update first name.\n2. Update last name.\n3. Update salary.\n4. Update dismissal date.\n5. Main Menu.");
+				s = in.nextLine();
+				while (s.length() > 1 || (s.charAt(0) < 49 && s.charAt(0) > 53)) {
+					System.out.println("Illegal input, please try again.");
+					s = in.nextLine();
+				}
+
+				switch (s.charAt(0)) {
+				case ('1'): {
+					System.out.println("Enter first name.\nIf you wish to return to the main Menu press ~");
+					String s3 = in.nextLine();
+					while (!(checkForExit(s3)) && !cheackStringOnlyLetters(s3)) {
+						System.out.println("Illegal input, please try again.");
+						s3 = in.nextLine();
+					}
+					if (checkForExit(s3))
+						run();
+					else {
+						worker.setFirstName(s3);
+						BL.updateWorkerInTable(worker);
+					}
+					break;
+				}
+				case ('2'): {
+					System.out.println("Enter last name.\nIf you wish to return to the main Menu press ~");
+					String s3 = in.nextLine();
+					while (!(checkForExit(s3)) && !cheackStringOnlyLetters(s3)) {
+						System.out.println("Illegal input, please try again.");
+						s3 = in.nextLine();
+					}
+					if (checkForExit(s3))
+						run();
+					else {
+						worker.setLastName(s3);
+						BL.updateWorkerInTable(worker);
+					}
+					break;
+				}
+				case ('3'): {
+					System.out.println("Enter salary.\nIf you wish to return to the main Menu press ~");
+					String s3 = in.nextLine();
+					while (!(checkForExit(s3)) && !cheackStringOnlyNum(s3)) {
+						System.out.println("Illegal input, please try again.");
+						s3 = in.nextLine();
+					}
+					if (checkForExit(s3))
+						run();
+					else {
+						worker.setSalary(Integer.parseInt(s3));
+						BL.updateWorkerInTable(worker);
+						break;
+					}
+				}
+				case ('4'): {
+					System.out.println(
+							"Enter dismissal date with format dd.MM.yyyy .\nIf you wish to return to the main Menu press ~");
+					String s3 = in.nextLine();
+					while (!(checkForExit(s3)) && !checkDate(s3)) {
+						System.out.println("Illegal input, please try again.");
+						s3 = in.nextLine();
+					}
+					if (checkForExit(s3))
+						run();
+					else {
+						worker.setCheckOutDate(s3);
+						BL.updateWorkerInTable(worker);
+						break;
+					}
+				}
+				case ('5'):
+					run();
+					break;
+				}
+			}
+			UpdateWorker();
+		}
+	}
+
+	private void getWorkerDetails() {
+		int id;
+		System.out.println("Update worker menu:\nEnter worker ID.\nIf you wish to return to the main Menu press ~ ");
+		String s = in.nextLine();
+		while (!checkForExit(s) && cutID(s) == -1) {
+			System.out.println("Illegal input, please try again.");
+			s = in.nextLine();
+		}
+		if (checkForExit(s))
+			run();
+		else {
+			id = Integer.parseInt(s);
+			if (!BL.checkIfIdExist(id)) {
+				System.out.println("The worker does not exist\n");
+				run();
+			} else {
+				Worker worker = BL.getWorkerById(id);
+				String output = "Worker full name: " + worker.getFirstName() + " " + worker.getLastName() + ".\n"
+						+ "Worker ID: " + worker.getId() + ".\n" + "Worker salary: " + worker.getSalary() + ".\n";
+				if (worker.getCheckOutDate() != null || checkDate(worker.getCheckOutDate()))
+					output = output + "Worker dismissal date: " + worker.getCheckOutDate() + ".\n";
+				System.out.println(output);
+				getWorkerDetails();
 			}
 		}
 	}
@@ -139,6 +268,30 @@ public class Command_Line_gui {
 			if (s.charAt(i) < 48 || s.charAt(i) > 57)
 				return false;
 		}
+		return true;
+	}
+
+	private boolean checkDate(String s) {
+		if (s.length() != 10)
+			return false;
+		for (int i = 0; i < s.length(); i++) {
+			if (i == 2 || i == 5) {
+				if (s.charAt(i) != '.')
+					return false;
+			} else {
+				if (s.charAt(i) < 48 && s.charAt(i) > 57)
+					return false;
+			}
+		}
+		String temp1 = s.substring(0, 2);
+		if (Integer.parseInt(temp1) > 31 || Integer.parseInt(temp1) < 0)
+			return false;
+		String temp2 = s.substring(3, 5);
+		if (Integer.parseInt(temp2) > 12 || Integer.parseInt(temp2) < 0)
+			return false;
+		String temp3 = s.substring(6);
+		if (Integer.parseInt(temp3) < 0)
+			return false;
 		return true;
 	}
 }
